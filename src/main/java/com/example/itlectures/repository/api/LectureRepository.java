@@ -1,4 +1,4 @@
-package com.example.itlectures.repository;
+package com.example.itlectures.repository.api;
 
 import com.example.itlectures.model.Lecture;
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.example.itlectures.config;
 
 import com.example.itlectures.model.Lecture;
-import com.example.itlectures.repository.LectureRepository;
+import com.example.itlectures.repository.api.LectureRepository;
 import com.example.itlectures.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

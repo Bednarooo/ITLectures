@@ -1,15 +1,17 @@
-package com.example.itlectures.service;
+package com.example.itlectures.service.impl;
 
 import com.example.itlectures.exceptions.UserNotFoundException;
 import com.example.itlectures.model.Lecture;
-import com.example.itlectures.repository.LectureRepository;
+import com.example.itlectures.repository.api.LectureRepository;
+import com.example.itlectures.service.api.LectureService;
+import com.example.itlectures.service.api.UserService;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LectureService {
+public class LectureServiceImpl implements LectureService {
   @Autowired
   private LectureRepository lectureRepository;
   @Autowired
@@ -19,7 +21,7 @@ public class LectureService {
     return lectureRepository.findById(id);
   }
 
-  public List<Lecture> findAllLectures() {
+  public List<Lecture> findAll() {
     return lectureRepository.findAll();
   }
 
