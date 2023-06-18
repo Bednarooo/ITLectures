@@ -25,8 +25,6 @@ public class Lecture extends AbstractEntity {
   @Column(nullable = false, unique = true, updatable = false)
   private String title;
   @Column(nullable = false)
-  private String description;
-  @Column(nullable = false)
   private LocalDateTime startTime;
   @Column(nullable = false)
   private LocalDateTime endTime;
