@@ -7,7 +7,6 @@ import com.example.itlectures.repository.api.LectureRepository;
 import com.example.itlectures.service.api.LectureService;
 import com.example.itlectures.service.api.UserService;
 import java.io.FileNotFoundException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,14 +26,17 @@ public class LectureServiceImpl implements LectureService {
     this.userService = userService;
   }
 
+  @Override
   public Optional<Lecture> findById(Long id) {
     return lectureRepository.findById(id);
   }
 
+  @Override
   public List<Lecture> findAll() {
     return lectureRepository.findAll();
   }
 
+  @Override
   public List<Lecture> findAllByUserLogin(String login) throws UserNotFoundException {
     if (userService.findByLogin(login).isPresent()) {
       return lectureRepository.findAllByUsersLogin(login);
@@ -43,8 +45,9 @@ public class LectureServiceImpl implements LectureService {
     }
   }
 
-  public Lecture reserveLectureSlot(Long lectureId, String login, String email) throws LectureNotFoundException,
-      LectureIsFullException, LoginAlreadyUsedException, UserAlreadyAssignedToLectureAtThisTimeException,
+  @Override
+  public Lecture createReservation(Long lectureId, String login, String email) throws LectureNotFoundException,
+      LectureIsFullException, LoginAlreadyUsedException, UserAlreadyAssignedToLectureAtTheSameTimeException,
       FileNotFoundException {
     Lecture lecture = findById(lectureId).orElseThrow(LectureNotFoundException::new);
     Set<User> assignedUsers = lecture.getUsers();
@@ -63,7 +66,7 @@ public class LectureServiceImpl implements LectureService {
         List<Lecture> lecturesWithSameStartTime = lectureRepository.findAllByStartTime(lecture.getStartTime());
         for (Lecture parallelLecture : lecturesWithSameStartTime) {
           if (parallelLecture.getUsers().contains(user)) {
-            throw new UserAlreadyAssignedToLectureAtThisTimeException();
+            throw new UserAlreadyAssignedToLectureAtTheSameTimeException();
           }
         }
         lecture.getUsers().add(user);
@@ -77,24 +80,25 @@ public class LectureServiceImpl implements LectureService {
       lecture.getUsers().add(user);
     }
     Lecture savedLecture = lectureRepository.save(lecture);
-    String startTimeMinutes = String.format("%02d", savedLecture.getStartTime().getMinute());
-
-    LocalDateTime sendDateTime = LocalDateTime.now();
-    String sendTimeMinutes = String.format("%02d", sendDateTime.getMinute());
-    String notification =
-        "Data wysłania: " + sendDateTime.getDayOfMonth()
-        + "." + sendDateTime.getMonth() + "." + sendDateTime.getYear() + "r. "
-        + sendDateTime.getHour() + ":" + sendTimeMinutes
-        + "\nGratulacje " + user.getEmail() + "!"
-        + "\nUdało Ci się zapisać na poniższy wykład:"
-        + "\nTytuł: " + savedLecture.getTitle()
-        + "\nData rozpoczęcia: " + savedLecture.getStartTime().getDayOfMonth()
-        + "." + savedLecture.getStartTime().getMonth() + "." + savedLecture.getStartTime().getYear() + "r. "
-        + savedLecture.getStartTime().getHour() + ":" + startTimeMinutes
-        + "\nData zakończenia: " + savedLecture.getEndTime().getDayOfMonth()
-        + "." + savedLecture.getEndTime().getMonth() + "." + savedLecture.getEndTime().getYear() + "r. "
-        + savedLecture.getEndTime().getHour() + ":" + savedLecture.getEndTime().getMinute() + "\n\n";
-    FileUtils.saveNotificationToFile("powiadomienia.txt", notification);
+    FileUtils.saveNotificationToFile("powiadomienia.txt", savedLecture, user);
     return savedLecture;
   }
+
+  @Override
+  public Lecture cancelReservation(Long lectureId, String login) throws UserNotFoundException, LectureNotFoundException, UserNotAssignedToLectureException {
+    Lecture lecture = findById(lectureId).orElseThrow(LectureNotFoundException::new);
+    User user = userService.findByLogin(login).orElseThrow(UserNotFoundException::new);
+    List<Lecture> userLectures = findAllByUserLogin(login);
+    if (userLectures.contains(lecture)) {
+      for (Lecture userLecture : userLectures) {
+        if (userLecture.getId().equals(lectureId)) {
+          userLecture.getUsers().remove(user);
+          return lectureRepository.save(userLecture);
+        }
+      }
+    }
+    throw new UserNotAssignedToLectureException();
+  }
+
+
 }

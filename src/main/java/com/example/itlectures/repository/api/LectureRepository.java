@@ -12,6 +12,5 @@ import org.springframework.stereotype.Repository;
 public interface LectureRepository extends JpaRepository<Lecture, Long> {
   Optional<Lecture> findById(Long id);
   List<Lecture> findAllByUsersLogin(String login);
-
   List<Lecture> findAllByStartTime(LocalDateTime startTime);
 }

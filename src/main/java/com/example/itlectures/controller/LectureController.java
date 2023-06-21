@@ -1,6 +1,7 @@
 package com.example.itlectures.controller;
 
-import com.example.itlectures.dto.ReserveLectureSlotDto;
+import com.example.itlectures.dto.CancelReservationDto;
+import com.example.itlectures.dto.CreateReservationDto;
 import com.example.itlectures.exceptions.*;
 import com.example.itlectures.model.Lecture;
 import com.example.itlectures.service.api.LectureService;
@@ -41,17 +42,29 @@ public class LectureController {
   }
 
   @PostMapping("/reserve")
-  public ResponseEntity<Lecture> reserveLectureSlot(@RequestBody ReserveLectureSlotDto reserveLectureSlotDto) {
+  public ResponseEntity<Lecture> createReservation(@RequestBody CreateReservationDto createReservationDto) {
     try {
-      return new ResponseEntity<>(lectureService.reserveLectureSlot(reserveLectureSlotDto.getLectureId(),
-          reserveLectureSlotDto.getLogin(), reserveLectureSlotDto.getEmail()), HttpStatus.OK);
+      return new ResponseEntity<>(lectureService.createReservation(createReservationDto.getLectureId(),
+          createReservationDto.getLogin(), createReservationDto.getEmail()), HttpStatus.CREATED);
     } catch (LectureNotFoundException lnfe) {
       return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     } catch (LectureIsFullException | LoginAlreadyUsedException
-             | UserAlreadyAssignedToLectureAtThisTimeException life) {
+             | UserAlreadyAssignedToLectureAtTheSameTimeException life) {
       return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     } catch (FileNotFoundException fnfe) {
       return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @DeleteMapping("/cancel")
+  public ResponseEntity<Lecture> cancelReservation(@RequestBody CancelReservationDto cancelReservationDto) {
+    try {
+      return new ResponseEntity<>(lectureService.cancelReservation(cancelReservationDto.getLectureId(),
+          cancelReservationDto.getLogin()), HttpStatus.OK);
+    } catch (LectureNotFoundException | UserNotFoundException nfe) {
+      return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    } catch (UserNotAssignedToLectureException bre) {
+      return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
   }
 }

@@ -11,6 +11,9 @@ public interface LectureService {
   Optional<Lecture> findById(Long id);
   List<Lecture> findAll();
   List<Lecture> findAllByUserLogin(String login) throws UserNotFoundException;
-  Lecture reserveLectureSlot(Long lectureId, String login, String email) throws LectureNotFoundException,
-      LectureIsFullException, LoginAlreadyUsedException, UserAlreadyAssignedToLectureAtThisTimeException, FileNotFoundException;
+  Lecture createReservation(Long lectureId, String login, String email) throws LectureNotFoundException,
+      LectureIsFullException, LoginAlreadyUsedException, UserAlreadyAssignedToLectureAtTheSameTimeException,
+      FileNotFoundException;
+
+  Lecture cancelReservation(Long lectureId, String login) throws UserNotFoundException, LectureNotFoundException, UserNotAssignedToLectureException;
 }

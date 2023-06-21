@@ -12,14 +12,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReserveLectureSlotDto {
+public class CancelReservationDto {
   @NotNull
   @Positive
   private Long lectureId;
 
   @NotBlank
   private String login;
-
-  @NotBlank
-  private String email;
 }
