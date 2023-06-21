@@ -5,6 +5,7 @@ import com.example.itlectures.dto.CreateReservationDto;
 import com.example.itlectures.exceptions.*;
 import com.example.itlectures.model.Lecture;
 import com.example.itlectures.service.api.LectureService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,13 +37,11 @@ public class LectureController {
       return new ResponseEntity<>(lectureService.findAllByUserLogin(login), HttpStatus.OK);
     } catch (UserNotFoundException unfe) {
       return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-    } catch (Exception e) {
-      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @PostMapping("/reserve")
-  public ResponseEntity<Lecture> createReservation(@RequestBody CreateReservationDto createReservationDto) {
+  public ResponseEntity<Lecture> createReservation(@RequestBody @Valid CreateReservationDto createReservationDto) {
     try {
       return new ResponseEntity<>(lectureService.createReservation(createReservationDto.getLectureId(),
           createReservationDto.getLogin(), createReservationDto.getEmail()), HttpStatus.CREATED);
@@ -57,7 +56,7 @@ public class LectureController {
   }
 
   @DeleteMapping("/cancel")
-  public ResponseEntity<Lecture> cancelReservation(@RequestBody CancelReservationDto cancelReservationDto) {
+  public ResponseEntity<Lecture> cancelReservation(@RequestBody @Valid CancelReservationDto cancelReservationDto) {
     try {
       return new ResponseEntity<>(lectureService.cancelReservation(cancelReservationDto.getLectureId(),
           cancelReservationDto.getLogin()), HttpStatus.OK);

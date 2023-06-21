@@ -1,5 +1,6 @@
 package com.example.itlectures.service.impl;
 
+import com.example.itlectures.exceptions.UserNotFoundException;
 import com.example.itlectures.model.User;
 import com.example.itlectures.repository.api.UserRepository;
 import com.example.itlectures.service.api.UserService;
@@ -18,5 +19,12 @@ public class UserServiceImpl implements UserService {
   @Override
   public Optional<User> findByLogin(String login) {
     return userRepository.findByLogin(login);
+  }
+
+  @Override
+  public User updateEmail(String login, String newEmail) throws UserNotFoundException {
+    User user = findByLogin(login).orElseThrow(UserNotFoundException::new);
+    user.setEmail(newEmail);
+    return userRepository.save(user);
   }
 }
