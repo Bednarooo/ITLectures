@@ -1,14 +1,12 @@
 package com.example.itlectures.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,7 +27,11 @@ public class Lecture extends AbstractEntity {
   @Column(nullable = false)
   private LocalDateTime endTime;
 
-  @ManyToMany(mappedBy = "lectures")
+  @ManyToMany(cascade = CascadeType.MERGE)
+  @JoinTable(
+      name = "user_lecture",
+      joinColumns = { @JoinColumn(name = "lecture_id") },
+      inverseJoinColumns = { @JoinColumn(name = "user_id") })
   @Builder.Default
-  private List<User> users = new ArrayList<>();
+  private Set<User> users = new HashSet<>();
 }

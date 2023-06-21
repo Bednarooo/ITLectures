@@ -9,8 +9,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService {
-  @Autowired
-  private UserRepository userRepository;
+  private final UserRepository userRepository;
+
+  public UserServiceImpl(@Autowired UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
 
   public Optional<User> findByLogin(String login) {
     return userRepository.findByLogin(login);
