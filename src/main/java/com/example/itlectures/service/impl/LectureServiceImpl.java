@@ -1,5 +1,6 @@
 package com.example.itlectures.service.impl;
 
+import com.example.itlectures.dto.InterestOfLectureDto;
 import com.example.itlectures.exceptions.*;
 import com.example.itlectures.model.Lecture;
 import com.example.itlectures.model.User;
@@ -7,10 +8,8 @@ import com.example.itlectures.repository.api.LectureRepository;
 import com.example.itlectures.service.api.LectureService;
 import com.example.itlectures.service.api.UserService;
 import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+
 import com.example.itlectures.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -100,5 +99,22 @@ public class LectureServiceImpl implements LectureService {
     throw new UserNotAssignedToLectureException();
   }
 
-
+  @Override
+  public List<InterestOfLectureDto> getInterestOfEachLecture() {
+    List<Lecture> lectures = findAll();
+    List<InterestOfLectureDto> interestOfLectures = new ArrayList<>();
+    for (Lecture lecture : lectures) {
+        interestOfLectures.add(InterestOfLectureDto.builder()
+          .title(lecture.getTitle())
+          .interest(lecture.getUsers().size() / 5.0)
+          .build());
+    }
+    interestOfLectures.sort((o1, o2) -> {
+      if (Objects.equals(o1.getInterest(), o2.getInterest())) {
+        return 0;
+      }
+      return o1.getInterest() > o2.getInterest() ? -1 : 1;
+    });
+    return interestOfLectures;
+  }
 }

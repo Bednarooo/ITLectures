@@ -1,5 +1,6 @@
 package com.example.itlectures.service.api;
 
+import com.example.itlectures.dto.InterestOfLectureDto;
 import com.example.itlectures.exceptions.*;
 import com.example.itlectures.model.Lecture;
 
@@ -16,4 +17,6 @@ public interface LectureService {
       FileNotFoundException;
 
   Lecture cancelReservation(Long lectureId, String login) throws UserNotFoundException, LectureNotFoundException, UserNotAssignedToLectureException;
+  List<InterestOfLectureDto> getInterestOfEachLecture();
+
 }

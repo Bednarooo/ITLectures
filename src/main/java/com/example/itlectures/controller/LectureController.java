@@ -2,6 +2,7 @@ package com.example.itlectures.controller;
 
 import com.example.itlectures.dto.CancelReservationDto;
 import com.example.itlectures.dto.CreateReservationDto;
+import com.example.itlectures.dto.InterestOfLectureDto;
 import com.example.itlectures.exceptions.*;
 import com.example.itlectures.model.Lecture;
 import com.example.itlectures.service.api.LectureService;
@@ -65,5 +66,11 @@ public class LectureController {
     } catch (UserNotAssignedToLectureException bre) {
       return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  @GetMapping("/all/interest")
+  public ResponseEntity<List<InterestOfLectureDto>> getInterestOfEachLecture() {
+    return new ResponseEntity<>(lectureService.getInterestOfEachLecture(),
+        HttpStatus.OK);
   }
 }
