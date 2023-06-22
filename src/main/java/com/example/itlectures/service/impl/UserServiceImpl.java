@@ -4,6 +4,8 @@ import com.example.itlectures.exceptions.UserNotFoundException;
 import com.example.itlectures.model.User;
 import com.example.itlectures.repository.api.UserRepository;
 import com.example.itlectures.service.api.UserService;
+
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,5 +28,10 @@ public class UserServiceImpl implements UserService {
     User user = findByLogin(login).orElseThrow(UserNotFoundException::new);
     user.setEmail(newEmail);
     return userRepository.save(user);
+  }
+
+  @Override
+  public List<User> findAll() {
+    return userRepository.findAll();
   }
 }
