@@ -5,6 +5,7 @@ import com.example.itlectures.exceptions.*;
 import com.example.itlectures.model.Lecture;
 
 import java.io.FileNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,8 +16,9 @@ public interface LectureService {
   Lecture createReservation(Long lectureId, String login, String email) throws LectureNotFoundException,
       LectureIsFullException, LoginAlreadyUsedException, UserAlreadyAssignedToLectureAtTheSameTimeException,
       FileNotFoundException;
-
-  Lecture cancelReservation(Long lectureId, String login) throws UserNotFoundException, LectureNotFoundException, UserNotAssignedToLectureException;
+  Lecture cancelReservation(Long lectureId, String login) throws UserNotFoundException, LectureNotFoundException,
+      UserNotAssignedToLectureException;
   List<InterestOfLectureDto> getInterestOfEachLecture();
-
+  List<InterestOfLectureDto> getInterestOfEachLectureAtTheSameTime(LocalDateTime lectureTime)
+      throws LecturesNotFoundAtSpecifiedTimeException;
 }

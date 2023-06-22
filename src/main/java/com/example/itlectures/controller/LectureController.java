@@ -8,12 +8,16 @@ import com.example.itlectures.model.Lecture;
 import com.example.itlectures.service.api.LectureService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.FileNotFoundException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/lecture")
@@ -25,52 +29,63 @@ public class LectureController {
 
   @GetMapping("/all")
   public ResponseEntity<List<Lecture>> getAllTutorials() {
-    try {
-      return new ResponseEntity<>(lectureService.findAll(), HttpStatus.OK);
-    } catch (Exception e) {
-      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return new ResponseEntity<>(lectureService.findAll(), HttpStatus.OK);
   }
 
   @GetMapping("/all/login/{login}")
-  public ResponseEntity<List<Lecture>> getAllTutorialsByLogin(@PathVariable("login") String login) {
-    try {
-      return new ResponseEntity<>(lectureService.findAllByUserLogin(login), HttpStatus.OK);
-    } catch (UserNotFoundException unfe) {
-      return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-    }
+  public ResponseEntity<List<Lecture>> getAllTutorialsByLogin(@PathVariable("login") String login) throws UserNotFoundException {
+    return new ResponseEntity<>(lectureService.findAllByUserLogin(login), HttpStatus.OK);
   }
 
   @PostMapping("/reserve")
-  public ResponseEntity<Lecture> createReservation(@RequestBody @Valid CreateReservationDto createReservationDto) {
-    try {
-      return new ResponseEntity<>(lectureService.createReservation(createReservationDto.getLectureId(),
+  public ResponseEntity<Lecture> createReservation(@RequestBody @Valid CreateReservationDto createReservationDto)
+      throws FileNotFoundException, LoginAlreadyUsedException, LectureIsFullException, LectureNotFoundException,
+      UserAlreadyAssignedToLectureAtTheSameTimeException {
+    return new ResponseEntity<>(lectureService.createReservation(createReservationDto.getLectureId(),
           createReservationDto.getLogin(), createReservationDto.getEmail()), HttpStatus.CREATED);
-    } catch (LectureNotFoundException lnfe) {
-      return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-    } catch (LectureIsFullException | LoginAlreadyUsedException
-             | UserAlreadyAssignedToLectureAtTheSameTimeException life) {
-      return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-    } catch (FileNotFoundException fnfe) {
-      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
   }
 
   @DeleteMapping("/cancel")
-  public ResponseEntity<Lecture> cancelReservation(@RequestBody @Valid CancelReservationDto cancelReservationDto) {
-    try {
-      return new ResponseEntity<>(lectureService.cancelReservation(cancelReservationDto.getLectureId(),
-          cancelReservationDto.getLogin()), HttpStatus.OK);
-    } catch (LectureNotFoundException | UserNotFoundException nfe) {
-      return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-    } catch (UserNotAssignedToLectureException bre) {
-      return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<Lecture> cancelReservation(@RequestBody @Valid CancelReservationDto cancelReservationDto)
+      throws UserNotFoundException, UserNotAssignedToLectureException, LectureNotFoundException {
+    return new ResponseEntity<>(lectureService.cancelReservation(cancelReservationDto.getLectureId(),
+        cancelReservationDto.getLogin()), HttpStatus.OK);
   }
 
   @GetMapping("/all/interest")
   public ResponseEntity<List<InterestOfLectureDto>> getInterestOfEachLecture() {
     return new ResponseEntity<>(lectureService.getInterestOfEachLecture(),
         HttpStatus.OK);
+  }
+
+  @GetMapping("all/interest/startTime")
+  public ResponseEntity<List<InterestOfLectureDto>> getInterestOfEachLectureAtTheSameTime(@RequestParam("startTime")
+                                                                                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                                                          LocalDateTime startTime) throws LecturesNotFoundAtSpecifiedTimeException {
+      return new ResponseEntity<>(lectureService.getInterestOfEachLectureAtTheSameTime(startTime),
+          HttpStatus.OK);
+  }
+
+  @ExceptionHandler({UserNotFoundException.class, FileNotFoundException.class, LectureNotFoundException.class,
+      LecturesNotFoundAtSpecifiedTimeException.class})
+  public ResponseEntity<Map<String, String>> handleNotFoundException(Exception ex) {
+    Map<String, String> map = new HashMap<>();
+    map.put("error: ", ex.getMessage());
+    return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler({LectureIsFullException.class, UserAlreadyAssignedToLectureAtTheSameTimeException.class,
+      UserNotAssignedToLectureException.class})
+  public ResponseEntity<Map<String, String>> handleBadRequestException(Exception ex) {
+    Map<String, String> map = new HashMap<>();
+    map.put("error: ", ex.getMessage());
+    return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler({LoginAlreadyUsedException.class})
+  public ResponseEntity<Map<String, String>> handleConflictException(Exception ex) {
+    Map<String, String> map = new HashMap<>();
+    map.put("error: ", ex.getMessage());
+    return new ResponseEntity<>(map, HttpStatus.CONFLICT);
   }
 }

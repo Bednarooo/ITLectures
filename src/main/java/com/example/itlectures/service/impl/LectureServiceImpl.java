@@ -8,6 +8,7 @@ import com.example.itlectures.repository.api.LectureRepository;
 import com.example.itlectures.service.api.LectureService;
 import com.example.itlectures.service.api.UserService;
 import java.io.FileNotFoundException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import com.example.itlectures.utils.FileUtils;
@@ -102,9 +103,23 @@ public class LectureServiceImpl implements LectureService {
   @Override
   public List<InterestOfLectureDto> getInterestOfEachLecture() {
     List<Lecture> lectures = findAll();
+    return getInterestOfLectures(lectures);
+  }
+
+  @Override
+  public List<InterestOfLectureDto> getInterestOfEachLectureAtTheSameTime(LocalDateTime lectureTime) throws LecturesNotFoundAtSpecifiedTimeException {
+    List<Lecture> lecturesAtTheSameTime = lectureRepository.findAllByStartTime(lectureTime);
+    if (lecturesAtTheSameTime.size() == 0) {
+      throw new LecturesNotFoundAtSpecifiedTimeException();
+    } else {
+      return getInterestOfLectures(lecturesAtTheSameTime);
+    }
+  }
+
+  private List<InterestOfLectureDto> getInterestOfLectures (List < Lecture > lectures) {
     List<InterestOfLectureDto> interestOfLectures = new ArrayList<>();
     for (Lecture lecture : lectures) {
-        interestOfLectures.add(InterestOfLectureDto.builder()
+      interestOfLectures.add(InterestOfLectureDto.builder()
           .title(lecture.getTitle())
           .interest(lecture.getUsers().size() / 5.0)
           .build());
